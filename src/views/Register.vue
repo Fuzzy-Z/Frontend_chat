@@ -46,7 +46,7 @@ export default {
         return
       }
       try {
-        await axios.post('http://26.13.12.86/users', {
+        await axios.post('http://localhost:3000/users', {
           user: {
             email: this.email,
             password: this.password,

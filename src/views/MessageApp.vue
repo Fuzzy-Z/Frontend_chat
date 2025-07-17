@@ -15,8 +15,8 @@
 
       <form @submit.prevent="sendMessage" class="input-area">
         <input
-          v-model="receiverId"
-          placeholder="ID do destinatário"
+          v-model="receiverEmail"
+          placeholder="Email destinatário"
           class="recipient"
         />
         <div class="input-wrapper">
@@ -42,12 +42,14 @@ export default {
     return {
       messages: [],
       content: '',
-      receiverId: ''
+      receiverEmail: '',
+      socket: null // WebSocket
     }
   },
   async mounted() {
     await this.fetchMessages()
     this.scrollToBottom()
+    this.connectWebSocket()
   },
   updated() {
     this.scrollToBottom()
@@ -55,50 +57,89 @@ export default {
   methods: {
     async fetchMessages() {
       const res = await api.get('/messages', {
-    headers: { Authorization: `Bearer ${this.token}` }
-  })
-  this.messages = res.data
+        headers: { Authorization: `Bearer ${this.token}` }
+      })
+      this.messages = res.data
     },
     async sendMessage() {
       try {
         await api.post(
-      '/messages',
-      {
-        message: {
-          receiver_id: this.receiverId,
-          content: this.content
-        }
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${this.token}`
-        }
-      }
-    )
-
-    this.content = ''
-    await this.fetchMessages()
-  } catch (error) {
-    const errors =
-      error.response?.data?.errors ||
-      error.response?.data?.error ||
-      error.message
-    alert(
-      'Erro ao enviar mensagem: ' +
-        (Array.isArray(errors) ? errors.join(', ') : errors)
-    )
-    console.error('Erro ao enviar mensagem:', errors)
+          '/messages',
+          {
+            message: {
+              receiver_email: this.receiverEmail,
+              content: this.content
+            }
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${this.token}`
+            }
+          }
+        )
+        this.content = ''
+      } catch (error) {
+        const errors =
+          error.response?.data?.errors ||
+          error.response?.data?.error ||
+          error.message
+        alert(
+          'Erro ao enviar mensagem: ' +
+            (Array.isArray(errors) ? errors.join(', ') : errors)
+        )
+        console.error('Erro ao enviar mensagem:', errors)
       }
     },
     scrollToBottom() {
       this.$nextTick(() => {
         const container = this.$refs.messagesContainer
-        container.scrollTop = container.scrollHeight
+        if (container) {
+          container.scrollTop = container.scrollHeight
+        }
       })
+    },
+    connectWebSocket() {
+      this.socket = new WebSocket(`ws://localhost:3000/cable?token=${this.token}`)
+
+      this.socket.onopen = () => {
+        console.log('Conectado ao WebSocket')
+        this.socket.send(
+          JSON.stringify({
+            command: 'subscribe',
+            identifier: JSON.stringify({ channel: 'ChatChannel' })
+          })
+        )
+      }
+
+      this.socket.onmessage = (event) => {
+        const data = JSON.parse(event.data)
+        if (data.type === 'ping' || !data.message) return
+
+        const msg = data.message
+        console.log('Mensagem recebida em tempo real:', msg)
+
+        // Apenas adiciona a mensagem se for relevante ao usuário
+        if (
+          msg.sender_id === this.userId ||
+          msg.receiver_id === this.userId
+        ) {
+          this.messages.push(msg)
+        }
+      }
+
+      this.socket.onclose = () => {
+        console.warn('WebSocket desconectado. Tentando reconectar...')
+        setTimeout(this.connectWebSocket, 3000)
+      }
+
+      this.socket.onerror = (e) => {
+        console.error('Erro no WebSocket:', e)
+      }
     }
   }
 }
 </script>
+
 
 <style scoped>
 .chat-container {

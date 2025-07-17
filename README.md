@@ -1,36 +1,65 @@
-# chat-frontend
+# Frontend Vue.js
 
-This template should help get you started developing with Vue 3 in Vite.
+Este é o frontend da aplicação, desenvolvido com Vue.js 3.5.17, utilizando Node.js 24.3.0 e Vue CLI 5.0.8.
 
-## Recommended IDE Setup
+---
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+## Tecnologias
 
-## Customize configuration
+- Node.js 24.3.0
+- Vue CLI 5.0.8
+- Vue.js 3.5.17
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+---
 
-## Project Setup
+## Como rodar o projeto
 
-```sh
+1. **Instalar as dependências**
+
+```bash
 npm install
 ```
 
-### Compile and Hot-Reload for Development
+2. **Iniciar o servidor de desenvolvimento**
 
-```sh
-npm run dev
+```bash
+npm run serve
 ```
 
-### Compile and Minify for Production
+O frontend estará disponível em [http://localhost:8080](http://localhost:8080).
 
-```sh
-npm run build
+---
+
+## Usuários já criados no backend (seeds)
+
+Estes usuários já estão disponíveis para login:
+
+```ruby
+User.create(email: "Kayky@email.com", password: "181023")
+User.create(email: "Jean@email.com", password: "101010")
 ```
 
-### Lint with [ESLint](https://eslint.org/)
+---
 
-```sh
-npm run lint
-```
-"# Frontend_chat" 
+## Diferenciais do Projeto
+
+Este projeto utiliza algumas tecnologias-chave para autenticação e comunicação em tempo real:
+
+- **WebSocket**: Permite comunicação em tempo real entre cliente e servidor (ex: envio/recebimento instantâneo de mensagens).
+- **Bcrypt**: Biblioteca para criptografar senhas com segurança no backend.
+- **JWT (JSON Web Token)**: Utilizado para autenticação de usuários via tokens seguros e compactos.
+
+---
+
+## Considerações
+
+- Certifique-se de que o backend esteja rodando antes de iniciar o frontend.
+- O projeto foi testado em ambiente Node 24+ e Vue CLI 5+.
+
+---
+
+## Contato
+
+Dúvidas, sugestões ou contribuições? Abra uma issue ou entre em contato.
+
+---
